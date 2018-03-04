@@ -1,0 +1,68 @@
+July 21, 2000
+
+We have a permission to distribute the iaik libraries with our code. The distribution license
+is only for non-commerical use!
+
+Here's the email confirming the permission:
+
+###########################################################################
+
+Date: Fri, 21 Jul 2000 12:13:28 +0200
+From: Peter Lipp <jce@iaik.at>
+To: Jarek Gawor <gawor@mcs.anl.gov>
+Subject: AW: distribution license
+
+> And since our applications are available for free
+> including the soure code and used by other people for educational purposes
+> we would like to get a permission to distribute your libraries with our
+> code.
+
+Feel free to do so!
+
+Peter
+______________________________________
+Dr. Peter Lipp
+IAIK, TU Graz
+Inffeldgasse 16a, A-8010 Graz, Austria
+Tel: +43 316 873 5513
+Fax: +43 316 873 5520
+
+############################################################################
+
+December 15,2000
+
+Copyright issues regarding the files iaik_jce_full.jar and
+iaik_ssl.jar:
+
+RSA Issues
+------------------------------------------------------------------------------
+(From IAIK website: http://jcewww.iaik.tu-graz.ac.at/legal/rsa.htm)
+
+As with cryptography in general, US customers have to be aware of some legal conditions for using IAIK Java Security software.  In the following, we shall attempt to explain the situation.  However, we are not legal experts, and so we cannot guarantee that the information given below is a 100% representation of the legal situation in your country. Should any of the details mentioned here be incorrect, please let us know. 
+
+Our IAIK-JCE toolkit can be obtained as a standard version without RSA and RC4 implementations. However, since, on the one hand, we offer special class libraries for extending the standard version with RSA/RC4-related code, and on the other, a full version including RSA and RC4, we must point out some regulations that are of particular relevance for US customers: 
+
+Our toolkit includes the RSA algorithm, which is patented in the US under Patent #4,405,829, 20 Sep 1983 (but not in any other country). For US citizens, this makes the licensing of the RSA algorithm necessary.  The US patent will expire on Sept. 20, 2000. 
+
+Until then, licensing involves (as far as we are informed) the obligatory use of RSAREF, Bsafe or Jsafe, all products by RSA Data Security Inc.. 
+
+Our  toolkit includes an algorithm called RC4, developed in 1987 by Ron Rivest for RSA Data Security Inc. This was a proprietary algorithm.  However, in September 1994 somebody posted C-source code on a mailing list which made it available to the public domain. 
+
+What does this mean? I should like to quote Bruce Schneier from his book Applied Cryptography, Wiley & Sons:
+
+So, what's the deal with RC4? It's no longer a trade secret, so presumably anyone can use it. However, RSA Data Security, Inc., will almost certainly sue anyone who uses unlicensed RC4 in a commercial product. They probably won't win, but they will certainly make it cheaper for a company to license than fight.
+
+Furthermore, we must point out that any application you produce using our crypto-code can only be exported from the US with an export licence. Export should be possible for crippled products that use only ca. 56-bit symmetric algorithms. 
+Most importantly, users must be aware of what is legally permissible. We cannot take any responsibilty for the various purposes for which our toolkit may be used and/or if the regulations are being heeded. The above statements are also made based on our knowledge to date, which may or may not be accurate. So please double check! 
+
+------------------------------------------------------------------------------
+Argonne (as far as we understand) does not currently have a license for
+the RSA algorithm.  However, the cog kit is not a commercial product.
+------------------------------------------------------------------------------
+
+
+
+
+
+
+

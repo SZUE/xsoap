@@ -1,0 +1,717 @@
+<!--
+This is an ant build file compatible and tested with ANT version 1.5.1
+(required some regexp library and optional.jar provided as part of ANT 1.5.1 to use replaceregexp task)
+
+All generated files are created under ${build} directory
+
+-->
+
+<project name="XSOAP" default="compile" basedir="..">
+
+  <!-- allow user to override properties with external file-->
+  <property file="build.properties" />
+
+  <!-- set global properties for this build -->
+
+  <property name="name" value="XSOAP"/>
+  <property name="year" value="2004"/>
+  <!-- TODO find way to conver dot to underscore in property value ex. 1.1 -> 1_1 -->
+  <property name="main_version" value="1.2.31"/>
+  <property name="version" value="${main_version}-B1"/>
+  <property name="xsoap_version" value="xsoap-${version}"/>
+  <property name="xsoap_tag" value="XSOAP_${version}"/>
+  <property name="organization" value="IU Extreme! Lab  http://www.extreme.indiana.edu/"/>
+  <property name="copyright"
+    value="Copyright (c) ${year} ${organization} All Rights Reserved."/>
+
+  <property name="debug" value="on"/>
+  <property name="deprecation" value="off"/>
+
+
+  <property name="doc" value="doc"/>
+
+  <property name="src_xpp" value="PullParser/src/java"/>
+  <property name="src_xpp_intf" value="${src_xpp}/intf"/>
+  <property name="src_xpp_impl" value="${src_xpp}/impl"/>
+  <property name="src_xpp_impl_factory" value="${src_xpp_impl}/factory"/>
+  <property name="src_xpp_impl_format" value="${src_xpp_impl}/format"/>
+  <property name="src_xpp_impl_node" value="${src_xpp_impl}/node"/>
+  <property name="src_xpp_impl_pullparser" value="${src_xpp_impl}/pullparser"/>
+  <property name="src_xpp_impl_tag" value="${src_xpp_impl}/tag"/>
+
+  <property name="src" value="src/java"/>
+
+  <property name="src_logging" value="minilogger/src/java/impl"/>
+  <property name="src_soaprmi" value="src/java/soaprmi"/>
+  <property name="src_util" value="${src_soaprmi}/util"/>
+  <property name="src_struct" value="${src_soaprmi}/struct"/>
+  <property name="src_mapping" value="${src_soaprmi}/mapping"/>
+  <property name="src_rmiapi" value="${src_soaprmi}/rmiapi"/>
+  <!--property name="src_manifest" value="${src_rmiapi}/META-INF/MANIFEST.MF"/-->
+  <property name="src_soap" value="${src_soaprmi}/soap"/>
+  <property name="src_port" value="${src_soaprmi}/port"/>
+  <property name="src_soaprpc" value="${src_soaprmi}/soaprpc"/>
+  <property name="src_rmi" value="${src_soaprmi}/rmi"/>
+  <property name="src_jndi" value="${src_soaprmi}/jndi"/>
+  <property name="src_wsdl" value="${src_soaprmi}/wsdl"/>
+
+  <property name="src_pyglobus" value="src/pyGlobus"/>
+  <property name="src_webapps" value="src/webapps"/>
+  <property name="src_tests" value="${src}/tests"/>
+  <property name="src_samples" value="${src}/samples"/>
+
+  <property name="src_security" value="${src}/security" />
+
+  <property name="build" value="build"/>
+  <property name="build_dist" value="${build}/dist"/>
+  <property name="build_lib" value="${build}/lib"/>
+  <property name="build_classes" value="${build}/classes"/>
+  <property name="build_tests" value="${build}/tests"/>
+  <property name="build_samples" value="${build}/samples"/>
+  <property name="build_apidoc" value="${doc}/api"/>
+  <property name="build_javadoc" value="${doc}/api_impl"/>
+  <property name="apidoc_packages" value="soaprmi.*"/>
+  <property name="api_sourcepath"
+  value="${src_rmiapi}:${src_rmi}:${src_jndi}:${src_soaprpc}:${src_soap}:${src_port}:${src_mapping}:${src_struct}:${src_logging}:${src_util}:${src_xpp_intf}"/>
+  <property name="javadoc_packages" value="soaprmi.*"/>
+  <!--property name="dist" value="dist/${xsoap_version}"/-->
+  <property name="dist" value="${build}/dist/${xsoap_version}"/>
+  <property name="dist_lite_zip" value="${build}/dist/${xsoap_version}_src.zip"/>
+  <property name="dist_lite_tar" value="${build}/dist/${xsoap_version}_src.tar"/>
+  <property name="dist_lite_tgz" value="${build}/dist/${xsoap_version}_src.tgz"/>
+  <property name="dist_full_zip" value="${build}/dist/${xsoap_version}_all.zip"/>
+  <property name="dist_full_tar" value="${build}/dist/${xsoap_version}_all.tar"/>
+  <property name="dist_full_tgz" value="${build}/dist/${xsoap_version}_all.tgz"/>
+  <property name="jar"  value="${build_lib}/${xsoap_version}.jar"/>
+
+  <property name="build_war"    value="${build}/webapps"/>
+  <property name="war"  value="${build_war}/xsoap.war"/>
+  <property name="webapps" value="src/webapps/xsoap"/>
+  <property name="webxml" value="${webapps}/WEB-INF/web.xml"/>
+
+
+  <patternset id="all_source_files">
+        <exclude name="**/*-"/>
+        <exclude name="**/*~"/>
+        <exclude name="**/*.mcp"/>
+        <exclude name="**/*_Data/**"/>
+  </patternset>
+
+  <!-- =================================================================== -->
+  <!-- Preparing build environment                                         -->
+  <!-- =================================================================== -->
+  <target name="clean">
+    <delete dir="${build_classes}"/>
+    <delete dir="${build_lib}"/>
+    <delete dir="${build_war}"/>
+    <delete dir="${build_tests}"/>
+    <delete dir="${build_samples}"/>
+    <!--delete dir="${build_dist}"/-->
+    <delete file="${dist_zip}"/>
+    <delete file="${war}"/>
+  </target>
+
+  <target name="prepare">
+    <mkdir dir="${build}"/>
+    <mkdir dir="${build_dist}"/>
+    <mkdir dir="${build_tests}"/>
+    <mkdir dir="${build_classes}"/>
+    <touch file="${build_classes}/${xsoap_tag}"/>
+    <available property="junit_present" classname="junit.framework.TestCase" />
+    <available property="servlets_present" classname="javax.servlet.Servlet" />
+    <available property="jsse_present" classname="javax.net.ssl.SSLSocket" />
+    <available property="cog_present" classname="org.globus.security.SSLClientConnection" />
+    <available property="wsdl4j_present" classname="com.ibm.wsdl.DefinitionImpl" />
+    <available property="id_map_present" classname="java.util.IdentityHashMap" />
+    <available property="dist_repository_present" file="${dist_repository}" type="dir"/>
+    <uptodate property="build_notRequired" targetfile="${jar}">
+      <srcfiles dir="${src_soaprmi}" includes="**/*.java"/>
+    </uptodate>
+  </target>
+
+  <target name="check_junit" unless="junit_present" depends="prepare">
+    <echo message="Warning: JUnit dependencies were not resolved."/>
+  </target>
+
+  <target name="check_servlets" unless="servlets_present" depends="prepare">
+    <echo message="Warning: Servlets dependencies were not resolved."/>
+  </target>
+
+  <target name="check_jsse" unless="jsse_present" depends="prepare">
+    <echo message="Warning: JSSE security dependencies were not resolved."/>
+  </target>
+
+  <target name="check_cog" unless="cog_present" depends="prepare">
+    <echo message="Warning: CoG security dependencies were not resolved."/>
+  </target>
+
+  <target name="check_wsdl4j" unless="wsdl4j_present" depends="prepare">
+    <echo message="Warning: WSDL dependencies were not resolved."/>
+  </target>
+
+  <target name="check_id_map" unless="id_map_present" depends="prepare">
+    <fail message="Error: Required JDK 1.4 or better to use java.util.IdentityHashMap. "/>
+  </target>
+
+  <target name="dependencies"
+     depends="prepare,check_id_map,check_junit,check_servlets,check_jsse,check_cog, check_wsdl4j"/>
+
+  <!-- =================================================================== -->
+  <!-- Compilation tasks                                                   -->
+  <!-- =================================================================== -->
+
+  <target name="all" depends="clean,compile"/>
+
+  <target name="compile" depends="soaprmi,tests,samples"/>
+
+  <target name="lowlevel" depends="test_mapping"/>
+
+  <target name="xpp_intf" depends="check_junit">
+    <javac debug="${debug}" deprecation="${deprecation}"
+       srcdir="${src_xpp_intf}" destdir="${build_classes}" classpath="${build_classes}"/>
+  </target>
+
+  <target name="xpp_impl">
+    <javac debug="${debug}" deprecation="${deprecation}"
+       srcdir="${src_xpp_impl_tag}" destdir="${build_classes}" classpath="${build_classes}"/>
+    <javac debug="${debug}" deprecation="${deprecation}"
+       srcdir="${src_xpp_impl_pullparser}" destdir="${build_classes}" classpath="${build_classes}"/>
+    <javac debug="${debug}" deprecation="${deprecation}"
+       srcdir="${src_xpp_impl_format}" destdir="${build_classes}" classpath="${build_classes}"/>
+    <javac debug="${debug}" deprecation="${deprecation}"
+       srcdir="${src_xpp_impl_node}" destdir="${build_classes}" classpath="${build_classes}"/>
+    <javac debug="${debug}" deprecation="${deprecation}"
+       srcdir="${src_xpp_impl_factory}" destdir="${build_classes}" classpath="${build_classes}"/>
+  </target>
+
+  <target name="xpp" depends="xpp_intf,xpp_impl"/>
+
+  <target name="logging" depends="xpp">
+    <javac debug="${debug}" deprecation="${deprecation}"
+       srcdir="${src_logging}" destdir="${build_classes}" classpath="${build_classes}"/>
+  </target>
+
+  <target name="util" depends="logging">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_util}"
+      destdir="${build_classes}"
+      classpath="${build_classes}"/>
+  </target>
+
+  <target name="test_util" if="junit_present" depends="util">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_tests}"
+      destdir="${build_tests}"
+      classpath="${build_classes}"
+      includes="**/util/**" />
+  </target>
+
+  <target name="struct" depends="test_util">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_struct}"
+      destdir="${build_classes}"
+      classpath="${build_classes}"/>
+  </target>
+
+  <target name="rmiapi" depends="struct">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_rmiapi}" destdir="${build_classes}" classpath="${build_classes}"/>
+  </target>
+
+
+  <target name="echo_intf" depends="rmiapi">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_samples}"
+      destdir="${build_tests}"
+      classpath="${build_classes}"
+      includes="interop/intf/Echo**,interop/intf/Test**" />
+  </target>
+
+  <target name="mapping" depends="echo_intf">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_mapping}"
+      destdir="${build_classes}"
+      classpath="${build_classes}"/>
+  </target>
+
+  <target name="test_mapping" if="junit_present" depends="mapping">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_tests}"
+      destdir="${build_tests}"
+      classpath="${build_classes}"
+      includes="**/mapping/**" />
+  </target>
+
+  <target name="soap_and_port" depends="test_mapping">
+    <!--javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_port}" destdir="${build_classes}" classpath="${build_classes}"/-->
+    <javac debug="${debug}" deprecation="${deprecation}"
+      destdir="${build_classes}" classpath="${build_classes}">
+        <src path="${src_port}"/>
+        <src path="${src_soap}"/>
+    </javac>
+  </target>
+
+  <target name="test_port" if="junit_present" depends="soap_and_port">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_tests}" destdir="${build_tests}" classpath="${build_classes}"
+      includes="**/port/**" />
+  </target>
+
+  <!--target name="soap" depends="test_port">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_soap}" destdir="${build_classes}" classpath="${build_classes}"/>
+  </target-->
+
+  <target name="test_soap" if="junit_present" depends="test_port">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_tests}" destdir="${build_tests}" classpath="${build_classes}"
+      includes="**/soap/**" />
+  </target>
+
+  <target name="soaprpc" depends="test_soap">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_soaprpc}" destdir="${build_classes}" classpath="${build_classes}"/>
+  </target>
+
+  <target name="test_soaprpc" if="junit_present" depends="soaprpc">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_tests}" destdir="${build_tests}" classpath="${build_classes}"
+      includes="**/soaprpc/**" />
+  </target>
+
+  <target name="rmi" depends="test_soaprpc">
+    <javac debug="${debug}" deprecation="${deprecation}"
+       srcdir="${src_rmi}" destdir="${build_classes}" classpath="${build_classes}"/>
+  </target>
+
+  <target name="test_rmi" if="junit_present" depends="rmi">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_tests}" destdir="${build_tests}" classpath="${build_classes}"
+      includes="**/rmi/**" />
+  </target>
+
+  <target name="jndi" depends="test_rmi">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_jndi}" destdir="${build_classes}" classpath="${build_classes}"/>
+  </target>
+
+  <target name="wsdl" if="wsdl4j_present" depends="check_wsdl4j">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_wsdl}" destdir="${build_classes}"
+      classpath="${build_classes}" />
+  </target>
+
+  <target name="update_version">
+    <replaceregexp file="${src_rmiapi}/soaprmi/Version.java"
+      match="(@XSOAP_MAIN_VERSION_START:).*@"
+      replace="\1${main_version}@"
+      byline="true" />
+    <replaceregexp file="${src_rmiapi}/soaprmi/Version.java"
+      match="(@XSOAP_IMPL_VERSION_START:).*@"
+      replace="\1${version}@"
+      byline="true" />
+  </target>
+
+  <target name="core" depends="jndi,update_version"/>
+
+  <target name="security_core" depends="core">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_security}"
+      destdir="${build_classes}"
+      classpath="${build_classes}"
+      excludes="**/*cog*/**,**/*jsse*/**"
+      />
+  </target>
+
+  <target name="jsse" if="jsse_present,cog_present" depends="security_core,check_jsse,check_cog">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_security}"
+      destdir="${build_classes}"
+      classpath="${build_classes}"
+      includes="**/*jsse*/**"
+      />
+  </target>
+
+  <target name="cog" if="cog_present" depends="security_core,check_cog">
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_security}"
+      destdir="${build_classes}"
+      classpath="${build_classes}"
+      includes="**/*cog*/**"
+      />
+  </target>
+
+  <target name="security" depends="core,security_core,jsse,cog"/>
+
+  <target name="jar" unless="build_notRequired" depends="core,security,wsdl">
+    <!--delete file="${build_classes}/META-INF/MANIFEST.MF"/-->
+
+    <!-- build manifest with version info as specified by Package Version Identification
+         http://java.sun.com/products/jdk/1.2/docs/guide/versioning/  file="${src_manifest}"-->
+
+    <!--mkdir dir="${build_classes}/META-INF/"/>
+    <copy file="${src_manifest}" tofile="${build_classes}/META-INF/MANIFEST.MF"/
+    -->
+
+    <mkdir dir="${build_lib}"/>
+    <jar jarfile="${jar}">
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <section name="soaprmi">
+                  <attribute name="Specification-Title" value="${name}"/>
+                  <attribute name="Specification-Version" value="${main_version}"/>
+                  <attribute name="Specification-Vendor" value="${organization}"/>
+                  <attribute name="Implementation-Title" value="${name}"/>
+                  <attribute name="Implementation-Version" value="${version}"/>
+                  <attribute name="Implementation-Vendor" value="${organization}"/>
+                </section>
+            </manifest>
+      <fileset dir="${build_classes}"/>
+    </jar>
+
+  </target>
+
+  <target name="soaprmi" depends="jar"/>
+
+  <target name="samples_servlet" if="servlets_present" depends="soaprmi,check_servlets">
+    <mkdir dir="${build_samples}"/>
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_samples}" destdir="${build_samples}"
+      classpath="${build_classes}"
+      includes="**/*Servlet*" />
+  </target>
+
+  <target name="samples" depends="soaprmi,samples_servlet">
+    <mkdir dir="${build_samples}"/>
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_samples}" destdir="${build_samples}"
+      classpath="${build_classes}"
+      excludes="**/*Servlet*,**/*_protocol/**" />
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- JUnit automatic tests                                               -->
+  <!-- =================================================================== -->
+
+  <path id="test-classpath">
+    <pathelement location="${build_classes}" />
+    <pathelement path="${java.class.path}" />
+  </path>
+
+  <target name="tests" if="junit_present" depends="soaprmi,check_junit">
+    <mkdir dir="${build_tests}"/>
+    <javac debug="${debug}" deprecation="${deprecation}"
+      srcdir="${src_tests}" destdir="${build_tests}" includes="AllTests.java">
+      <classpath refid="test-classpath" />
+    </javac>
+  </target>
+
+
+  <target name="junit" if="junit_present" depends="tests">
+    <junit haltonfailure="yes" fork="yes">
+      <classpath>
+        <path refid="test-classpath" />
+        <pathelement location="${build_tests}" />
+      </classpath>
+      <formatter type="plain" usefile="false" />
+      <test name="AllTests" />
+
+      <!--batchtest>
+        <fileset dir="${build_tests}">
+          <include name="**/PackageTest.class" />
+        </fileset>
+      </batchtest-->
+    </junit>
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Building WAR                                                        -->
+  <!-- =================================================================== -->
+
+  <target name="war" depends="soaprmi,samples">
+    <mkdir dir="${build_war}"/>
+    <war warfile="${war}" webxml="${webxml}">
+      <fileset dir="${webapps}">
+         <exclude name="WEB-INF/**"/>
+      </fileset>
+      <lib dir="${build_lib}">
+         <include name="${soaprmi_version}.jar"/>
+      </lib>
+      <classes dir="${build_samples}">
+         <include name="hello/**/*Servlet*"/>
+         <include name="hello/**/*Service*"/>
+      </classes>
+    </war>
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Building APPLET                                                     -->
+  <!-- =================================================================== -->
+
+
+
+  <!-- =================================================================== -->
+  <!-- Creates the API documentation                                       -->
+  <!-- =================================================================== -->
+  <target name="api" depends="soaprmi">
+    <delete dir="${build_apidoc}"/>
+    <mkdir dir="${build_apidoc}"/>
+    <javadoc packagenames="${apidoc_packages}"
+             public="yes"
+             sourcepath="${api_sourcepath}"
+             destdir="${build_apidoc}"
+             author="true"
+             version="true"
+             use="true"
+             windowtitle="${name} ${main_version} API"
+             doctitle="${name}"
+             bottom="${copyright}"
+    />
+  </target>
+
+  <!-- =================================================================== -->
+  <!-- Creates the JAVADOC documentation                                   -->
+  <!-- =================================================================== -->
+  <target name="api_impl" depends="soaprmi">
+    <delete dir="${build_javadoc}"/>
+    <mkdir dir="${build_javadoc}"/>
+    <javadoc packagenames="${javadoc_packages}"
+             sourcepath="${api_sourcepath}"
+             destdir="${build_javadoc}"
+             author="true"
+             version="true"
+             use="true"
+             windowtitle="Implementation ${name} ${version} API"
+             doctitle="Implementation ${name}"
+             bottom="${copyright}"
+    />
+  </target>
+
+
+  <!-- =================================================================== -->
+  <!-- Creates the XSOAP distribution                                    -->
+  <!-- =================================================================== -->
+  <target name="dist_lite" depends="compile, war, api">
+    <delete dir="${dist}"/>
+    <delete file="${dist_lite_zip}"/>
+
+    <mkdir dir="${dist}"/>
+
+    <mkdir dir="${dist}/${build_war}"/>
+    <copy todir="${dist}/${build_war}">
+      <fileset dir="${build_war}">
+         <include name="*.war"/>
+      </fileset>
+    </copy>
+
+    <mkdir dir="${dist}/build"/>
+    <copy todir="${dist}/build">
+      <fileset dir="${build}">
+        <include name="lib/${xsoap_version}*.jar"/>
+        <include name="classes/**"/>
+        <include name="samples/**"/>
+        <include name="tests/**"/>
+      </fileset>
+    </copy>
+
+    <!-- sources should be copied after build to make it newer -->
+    <mkdir dir="${dist}/src"/>
+
+    <mkdir dir="${dist}/${src_samples}"/>
+    <copy todir="${dist}/${src_samples}">
+      <fileset dir="${src_samples}">
+        <!--include name="**"/-->
+        <!--exclude name="**/soap/**"/-->
+        <exclude name="**/*_protocol/**"/>
+      </fileset>
+    </copy>
+
+
+    <mkdir dir="${dist}/${src_xpp_intf}"/>
+    <copy todir="${dist}/${src_xpp_intf}">
+      <fileset dir="${src_xpp_intf}">
+      </fileset>
+    </copy>
+
+    <mkdir dir="${dist}/${src_xpp_impl}"/>
+    <copy todir="${dist}/${src_xpp_impl}">
+      <fileset dir="${src_xpp_impl}">
+      </fileset>
+    </copy>
+
+    <mkdir dir="${dist}/${src_logging}"/>
+    <copy todir="${dist}/${src_logging}">
+      <fileset dir="${src_logging}">
+         <patternset refid="all_source_files"/>
+      </fileset>
+    </copy>
+
+    <mkdir dir="${dist}/${src_soaprmi}"/>
+    <copy todir="${dist}/${src_soaprmi}">
+      <fileset dir="${src_soaprmi}">
+         <patternset refid="all_source_files"/>
+      </fileset>
+    </copy>
+
+    <mkdir dir="${dist}/${src_security}"/>
+    <copy todir="${dist}/${src_security}">
+      <fileset dir="${src_security}">
+         <patternset refid="all_source_files"/>
+      </fileset>
+    </copy>
+
+    <mkdir dir="${dist}/${src_tests}"/>
+    <copy todir="${dist}/${src_tests}">
+      <fileset dir="${src_tests}">
+         <patternset refid="all_source_files"/>
+      </fileset>
+    </copy>
+
+    <mkdir dir="${dist}/${src_pyglobus}"/>
+    <copy todir="${dist}/${src_pyglobus}">
+      <fileset dir="${src_pyglobus}">
+      </fileset>
+    </copy>
+
+    <mkdir dir="${dist}/${src_webapps}"/>
+    <copy todir="${dist}/${src_webapps}">
+      <fileset dir="${src_webapps}">
+      </fileset>
+    </copy>
+
+    <mkdir dir="${dist}/${doc}"/>
+    <copy todir="${dist}/${doc}">
+      <fileset dir="${doc}">
+        <exclude name="**/*impl*/**"/>
+      </fileset>
+    </copy>
+
+    <copy file="LICENSE.txt" tofile="${dist}/LICENSE.txt"/>
+    <copy file="README.html" tofile="${dist}/README.html"/>
+    <copy file="INSTALL.txt" tofile="${dist}/INSTALL.txt"/>
+    <mkdir dir="${dist}/src/java"/>
+    <copy file="src/build.xml" tofile="${dist}/src/build.xml"/>
+
+    <copy todir="${dist}">
+      <fileset dir=".">
+        <include name="*.sh"/>
+        <include name="*.bat"/>
+      </fileset>
+    </copy>
+
+    <fixcrlf srcdir="${dist}"
+       eol="lf" eof="remove"
+       includes="**/*.html,**/*.txt,**/*.sh"
+     />
+
+    <fixcrlf srcdir="${dist}"
+       eol="crlf"
+       includes="**/*.bat"
+     />
+
+      <mkdir dir="${dist}/lib"/>
+      <copy todir="${dist}/lib">
+        <fileset dir="lib">
+          <exclude name="**/*.jar"/>
+        </fileset>
+      </copy>
+
+     <chmod perm="a+x" dir="${dist}"
+       includes="**/*.sh" />
+
+    <zip zipfile="${dist_lite_zip}" basedir="${build}/dist"
+      includes="${xsoap_version}/**"
+      excludes="${xsoap_version}/build/**,${xsoap_version}/doc/api/**"/>
+
+
+     <tar tarfile="${dist_lite_tar}"
+         longfile="gnu">
+
+          <tarfileset dir="${build}/dist" mode="755" username="aslom" group="ewww">
+              <include name="${xsoap_version}/**/*.sh"/>
+              <exclude name="${xsoap_version}/build/**"/>
+              <exclude name="${xsoap_version}/doc/api/**"/>
+         </tarfileset>
+         <tarfileset dir="${build}/dist" username="aslom" group="ewww">
+             <include name="${xsoap_version}/**"/>
+             <exclude name="${xsoap_version}/**/*.sh"/>
+              <exclude name="${xsoap_version}/build/**"/>
+              <exclude name="${xsoap_version}/doc/api/**"/>
+         </tarfileset>
+
+     </tar>
+
+
+     <gzip zipfile="${dist_lite_tgz}" src="${dist_lite_tar}" />
+    <delete file="${dist_lite_tar}"/>
+
+  </target>
+
+  <target name="dist_lib" depends="dist_lite">
+      <mkdir dir="${dist}/lib"/>
+      <copy todir="${dist}/lib">
+        <fileset dir="lib">
+          <exclude name="**/*jsse*/*.jar"/>
+        </fileset>
+      </copy>
+
+    <delete file="${dist_full_zip}"/>
+    <zip zipfile="${dist_full_zip}" basedir="${build}/dist"
+      includes="${xsoap_version}/**"/>
+
+
+     <tar tarfile="${dist_full_tar}"
+         longfile="gnu">
+
+          <tarfileset dir="${build}/dist" mode="755" username="aslom" group="ewww">
+              <include name="${xsoap_version}/**/*.sh"/>
+         </tarfileset>
+         <tarfileset dir="${build}/dist" username="aslom" group="ewww">
+             <include name="${xsoap_version}/**"/>
+             <exclude name="${xsoap_version}/**/*.sh"/>
+         </tarfileset>
+
+     </tar>
+
+     <gzip zipfile="${dist_full_tgz}" src="${dist_full_tar}" />
+    <delete file="${dist_full_tar}"/>
+
+     <antcall target="dist_repository" />
+  </target>
+
+  <target name="dist_repository" depends="prepare" if="dist_repository_present">
+    <copy todir="${dist_repository}/distributions">
+      <fileset dir="${build}/dist">
+        <include name="${xsoap_version}*.tgz"/>
+        <include name="${xsoap_version}*.zip"/>
+      </fileset>
+    </copy>
+
+
+    <copy todir="${dist_repository}/jars">
+      <fileset dir="${build}/lib">
+        <include name="${xsoap_version}*.jar"/>
+      </fileset>
+    </copy>
+
+  </target>
+
+  <target name="dist" depends="dist_lib,dist_repository">
+
+  </target>
+
+  <target name="run" depends="samples">
+    <java classname="interop.client.Main" fork="yes">
+      <arg value="soaprmi" />
+      <!--arg value="samples/list.xml" /-->
+      <classpath>
+        <path refid="test-classpath" />
+        <pathelement location="${build_samples}" />
+      </classpath>
+    </java>
+  </target>
+
+
+</project>
+

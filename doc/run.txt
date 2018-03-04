@@ -1,0 +1,233 @@
+Running XSOAP
+-------------
+
+If you do not have XSOAP built check doc/build.txt first 
+(XSOAP is pre-built in distribution file see build subdirectory)
+
+To run samples please use provided run script (on Windows run.bat and on UNIX run.sh).
+Samples can be run without run script but CLASSPATH needs to be 
+
+Before running make sure that JAVA_HOME environment variable points
+to your installation of JDK version 1.3 or above.
+
+OPTIONAL: to use JSSE security provider make sure to copy JSSE/JCE
+JAR files to lib/jsse or just use JDK 1.4 (JSSE is included in JDK 1.4)
+
+
+Before running samples ...
+--------------------------
+
+Before running samples automatic tests should be executed using run script
+to verify that you have properly installed and running XSOAP, use:
+
+	run AllTests
+
+and you should see output similar to:
+
+	..............
+	Time: 3.091
+
+	OK (14 tests)
+
+
+
+Running simple hello sample with RMI:
+-------------------------------------
+
+This is a simple sample that demonstrates how to write XSOAP services.
+
+
+First we run typical RMI services with RMI registry:
+
+
+in separate window start registry:
+
+	run registry [portregistry]
+
+for example on Windows 2000: start run registry 2367
+
+then in another window start hello server:
+
+
+	run hello_server [[//host[:portregistry]/]name_of_service]
+
+for example on Windows 2000: run hello_server //localhost:2367/my_service
+
+  
+if no name_of_service is provided "HelloService" will be used by default
+
+
+finally in yet another window start client:
+
+	run hello_client [[//host[:portregistry]/]name_of_service] [list of names]
+
+for example on Windows 2000: run hello_client //localhost:2367/my_service XSOAP User	
+and this should produce 
+
+	Client attempting to lookup in the registry to the name //localhost:2367/my_service
+	Client executing remote method sayHello on server with 'XSOAP' argument
+	Server said 'Hello from Indiana to XSOAP!'
+	Client executing remote method sayHello on server with 'User' argument
+	Server said 'Hello from Indiana to User!'
+	
+
+Running simple hello sample as service:
+---------------------------------------
+
+This works similarly to previous RMI scenario however no RMI registry is required
+and service is run on selected TCP port (inside small embedded web server)
+
+First start service:
+
+	run hello_server port
+
+for example on Windows 2000: start run hello_server 4589
+
+and then connect with hello client:
+
+	run hello_client http://host:port [list of names]
+
+for example on Windows 2000: run hello_client http://localhost:4589 Foo Bar
+and you should see something similar to:
+
+	Client executing remote method sayHello on server with 'Foo' argument
+	Server said 'Hello from Indiana to Foo!'
+	Client executing remote method sayHello on server with 'bar' argument
+	Server said 'Hello from Indiana to Bar!'
+
+
+
+Running GSI enabled simple hello service:
+-----------------------------------------
+
+First you need to have grid proxy initialized and cog.properties file
+configured [see CoG web page for details], for example on Windows 2000:
+
+	%COG_INSTALL_PATH%\bin\visual-grid-proxy-init
+
+Then you can start GSI personal SOAP service
+(it is personal as it will only accept connections from
+the owner of the generated proxy certificate):
+
+	run hello_server -secure 8444
+
+NOTE: make sure that you do not have JAVA_HOME set JDK1.4
+as currently IAIK included CoG is not working on JDK1.4 
+(and returns cryptic error iaik.security.ssl.SSLException: No common cipher suites.)
+
+now you can connect to just started server
+
+	run hello_client https://localhost:8444
+
+and you can verify also that it does not accept unsecure connections 
+just try to connect using run hello_client http://localhost:8444
+you should get:
+
+Client executing remote method sayHello on server with 'World' argument
+Exception in thread "main" IO Exception; nested exception is:
+java.io.IOException: Error parsing HTTP status line "??  ??(": java.util.NoSuchE
+lementException
+        at soaprmi.soaprpc.HttpUtils.post(HttpUtils.java:283)
+        at soaprmi.soaprpc.HttpSocketSoapInvocationHandler.invokeTransport(HttpS
+ocketSoapInvocationHandler.java:118)
+        at soaprmi.soaprpc.SoapDynamicStub.invoke(SoapDynamicStub.java:118)
+        at $Proxy0.sayHello(Unknown Source)
+        at hello.HelloClient.main(HelloClient.java:88)
+
+
+By default XSOAP does not use delegation however it is simple
+to turn delegation use by just setting system property
+soaprmi.security.providers to cog_delegation
+
+
+if you use run script on Windows 200 simply do
+	set JAVA_OPTS=-Dsoaprmi.security.providers=cog_delegation 
+	
+and now when hello server and client are used theu will do GSI delegation.	
+	
+you may also add some debug flags in case of problmes for example:
+	set JAVA_OPTS=-Dsoaprmi.security.providers=cog_delegation -Ddebug -DEBUG=5
+
+
+TOOD: more on delegation, use of JSSE -Dsoaprmi.security.providers=jsse and pyGlobus samples
+
+When things are not working?
+----------------------------
+
+You may want to enable logging output by simply setting exnnvironment
+variable JAVA_OPTS that is used by run script to add JVM parameters,
+following values are especially useful:
+	-Ddebug		enables ALL logging output in XSOAP
+	-Dlog=[[package]:level]	where package is java package or fully 
+			qualified class name and level can be: ALL, FINEST, 
+			FINER, FINE, CONFIG, INFO, WARNING, SEVERE, OFF
+examples:
+	-Ddebug
+	-Dlog=:ALL		this is equivalent to -Ddebug
+	-Dlog=soaprmi.soaprpc
+	-Dlog=soaprmi.soaprpc.HttpUtils
+	-Dlog=soaprmi.soaprpc:FINE,:ALL
+			
+for example on Windows 2000: set JAVA_OPTS=-Dlog=soaprmi.soap:FINEST,:CONFIG
+
+When CoG is used following options shows debug output (use level between 1 and 5):
+	-Dorg.globus.debug.level=5	
+	-DDEBUG_LEVEL=5		equivalent to previous one
+	
+
+Also when JSSE is used this may be useful
+	-Djavax.net.debug=help		for list of pssible options
+	-Djavax.net.debug=all
+	-Djavax.net.debug=ssl
+	-Djavax.net.debug=ssl,handshake,data,trustmanager
+
+
+-------------------------------
+THis part is not yet tested ....
+
+<H3>Hello Servlet</H3>
+
+<p>in build/lib thre is soaprmi.war
+
+<p> this file can be dropped into tomcat webapps and
+SoapRMI Hello sample will be automatically deployed when
+Tomcat is restarted.
+you should be able to access it at http://localhost:PORT/soaprmi
+for example
+<a href="http://localhost:8080/soaprmi/">http://localhost:8080/soaprmi/</a>
+
+<p>This sample contain friendl JSP page interacting with hello service.
+
+<p>However service can be also accessed from command line hello
+
+<pre>
+  run http://localhost:8080/soaprmi/servlet/hello
+</pre>
+
+<H3>Interop</H3>
+
+<p>Execute interoperability tests for SOAP 1.1:
+
+<p>Start server
+
+<pre>
+java interop.impl.InteropImpl
+</pre>
+
+<p>Start server
+<pre>
+java interop.client.Main soaprmi
+</pre>
+
+
+
+
+
+
+<br clear="all">
+<p>[<a href="../README.html">Back To SoapRMI Documentation</a>]<p>&nbsp;
+
+<HR>
+<address><a href="aslom@extreme.indiana.edu">Aleksander Slominski</a><address>
+</BODY>
+</HTML>

@@ -1,0 +1,56 @@
+Building XSOAP
+--------------
+
+
+NOTE: XSOAP distribution already contains JAR files and 
+precompiled samples so building is not necessary 
+unless you make changes to XSOAP.
+
+XSOAP uses simply scripted build system on top ANT.
+
+First make sure that JAVA_HOME environment variable points
+to your installation of JDK version 1.3 or above.
+
+OPTIONAL: to compile JSSE classes make sure to copy JSSE/JCE 
+JAR files to lib/jsse or use JDK 1.4
+
+If you want to use other JAR files simply replace already existing
+files in lib subdirectory (check README.txt files there for description).
+
+To build everything from scratch use build script 
+on UNIX it is ./build.sh and on WINDOWS build.bat refered here as "build":
+
+
+	build all
+
+
+when build finished execute automatic tests to verify XSOAP integrity:
+
+
+	build junit
+	
+
+and you should see all tests passed successfully, similarly to:
+
+junit:
+    [junit] Testsuite: AllTests
+    [junit] Tests run: 14, Failures: 0, Errors: 0, Time elapsed: 1.632 sec
+    [junit]
+    [junit] Testcase: testXmlEscape took 0.1 sec
+    [junit] Testcase: testXmlRoundtrip took 0.01 sec
+    [junit] Testcase: testPortMapping took 0.02 sec
+    [junit] Testcase: testStructMapping took 0.06 sec
+    [junit] Testcase: testInt took 0.1 sec
+    [junit] Testcase: testFloat took 0.06 sec
+    [junit] Testcase: testString took 0.01 sec
+    [junit] Testcase: testObject took 0.371 sec
+    [junit] Testcase: testMarshal took 0.03 sec
+    [junit] Testcase: testPortTransport took 0.06 sec
+    [junit] Testcase: testPortMarshal took 0.01 sec
+    [junit] Testcase: testServices took 0.601 sec
+    [junit] Testcase: testGUID took 0 sec
+    [junit] Testcase: testAPI took 0.18 sec
+
+
+
+Now check doc/run.txt for details on how to run samples.

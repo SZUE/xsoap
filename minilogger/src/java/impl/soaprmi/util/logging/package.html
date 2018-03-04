@@ -1,0 +1,40 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html">
+</head>
+<body bgcolor="#FFFFFF">
+<p>miniLogger provides a simple to use logging API that is very similar
+to Log4J and JDK 1.4 logging but works on all Java 2 versions. </p>
+<p>To use <i>mini</i>Logger following steps are required:</p>
+<ul>
+  <li>add import statement, ex: <code><br>
+  <br>
+  import soaprmi.util.logging.Logger;</code> <br>
+&nbsp;</li>
+  <li>inside your class create instance of logger that will be named after class
+  (ex. <code>foo.FooClass</code>) and will be shared by class methods, ex::<br>
+  <br>
+  <code>public class FooClass {</code><br>
+  <br>
+<code>&nbsp;&nbsp;&nbsp; private static Logger logger = Logger.getLogger();</code><br>
+  <br>
+<code>&nbsp;&nbsp;&nbsp; //....</code><br>
+  <br>
+  alternatively if logger catgory should be different from automatically 
+  determined full class name (&quot;foo.Foo&quot;) it can be set directly:<br>
+  <br>
+<code>&nbsp;&nbsp;&nbsp; private static Logger logger = Logger.getLogger(&quot;my.category.name&quot;);</code><br>
+  &nbsp;</li>
+  <li>use logger by calling logging methods on logger, ex:<br>
+  <br>
+<code>&nbsp;void hello(String name) {</code><br>
+<code>&nbsp;&nbsp;&nbsp; logger.entering(name);</code><br>
+<code>&nbsp;&nbsp;&nbsp; logger.fine(&quot;will do something&quot;);</code><br>
+<code>&nbsp;&nbsp;&nbsp; logger.exiting();</code><br>
+<code>  }</code><br>
+  <br>
+&nbsp;</li>
+</ul>
+</body>
+</html>

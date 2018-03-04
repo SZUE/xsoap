@@ -1,0 +1,16 @@
+XSOAP 1.2 (aka SoapRMI) documentation
+
+To build read: doc/build.txt
+
+To run samples read: doc/run.txt
+
+To find list of required jar files see README files in lib subdirectories.
+Actual version of jar files are indicated in jar file names (ex. junit37.jar)
+that are available in CVS and in full XSOAP distributions
+(see http://www.extreme.indiana.edu/xgws/xsoap/download/).
+You can also browse and download jar files for current XSOAP 
+release from:
+http://www.extreme.indiana.edu/xgws/xsoap/download/xsoap_1_2/lib/
+
+And to see more documentaion please use your favorite web browser to 
+open README.html in this directory.

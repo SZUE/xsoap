@@ -1,0 +1,51 @@
+<HTML>
+<HEAD>
+<TITLE>XSOAP Requirements
+</TITLE>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Aleksander Slominski">
+</HEAD>
+<BODY BGCOLOR="white">
+
+<H1>XSOAP Requirements</H2><P>
+
+<H2>Hardware</H2>
+
+<p>This is utility software and is designed to run
+on hardware capable of running J2SE 1.4.2 (or J2EE).
+
+<H2>Software</H2>
+
+<ul>
+<li>JDK 1.4.2 or better (it may compile and work with JDK 1.3+ but we no longer 
+test it)<li>INCLUDED: to enable GSI security: Java CoG Kit
+[available from http://www.globus.org/cog/java/
+and included in lib subdirectory]
+
+<li>to just use SSL security: JSSE
+[it is part of JDK 1.4 or must be downloaded from SUN
+if it is copied to lib/jsse it will be used automatically]
+
+<li>INCLUDED: JUnit 3.7 to compile automatic tests [included in lib subdirectory]
+and ANT 1.3 JUnit optional task to run junit tests from ant
+(ANT optional tasks JAR must be downloaded and installed).
+However if necessary tests can be run manually. [included in lib subdirectory]
+
+<li>INCLUDED: Servlets 2.2 JAR or better to compile some sample servlets
+and to generate sample WAR file to be deployed in servlet container
+(such as Tomcat) [included in lib subdirectory]
+
+<li>INCLUDED: working ANT 1.3+ installation to build from source
+(compilation is not required as precompiled code is included in build subdirectory)
+[ANT 1.5 included in lib subdirectory]
+</ul>
+
+
+<p>[<a href="../README.html">Back To SoapRMI Documentation</a>]
+
+
+<HR>
+<address><a href="http://www.extreme.indiana.edu/~aslom/">Aleksander Slominski</a><address>
+</address>
+</BODY>
+</HTML>

@@ -1,0 +1,431 @@
+<HTML>
+<HEAD>
+<TITLE>XSOAP Changes
+</TITLE>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Aleksander Slominski [http://www.extreme.indiana.edu/~aslom]">
+</HEAD>
+<BODY BGCOLOR="white">
+
+<H1>Changes to XSOAP 1.2</H1><P>
+
+<h3>In (not so distant) future:</h3>
+<ul>
+<li>CoG security provider unit tests (with delegation)
+</li>
+<li>add better handling of exceptions in Java-Java case
+</li>
+</ul>
+
+<h3><a name="XSOAP_1_2_29"></a>2004- (not released XSOAP_1_2_29)</h3>
+
+<ul>
+<li>2003-11-24: fixed NPE bug reported by Anatolij Zubow in 
+hello.HelloServiceImpl.sayHello() when this method tried to access connection 
+context properties and they were nto set as hello service was running inside 
+servlet container
+</li>
+</ul>
+
+<h3><a name="XSOAP_1_2_28"></a>2003-11-14 (XSOAP_1_2_28)</h3>
+
+<ul>
+
+<li>added support to produce SOAP 1.1 Faults that are compatible with WSDL 1.1
+description (and should increase AXIS and OGSI interoperability):
+soaprmi.RemoteException can take as first parameter XmlNode that
+will be serialized as first child of SOAP-ENVELOPE:Fault</li>
+
+<li>fixed bug in XmlNodeHandler as it tried to read namespace declarations even
+if there was no declarations at some ancestor </li>
+
+<li>forced use of no mixed content is soap dispatcher on pull parser obtained
+from pool (SoapDispatcherImpl)</li>
+
+<li>changed XmlNodeHandler so when passing xsd:any as XmlNode it has all
+in-scope namespace prefixes added to XmlNode</li>
+
+</ul>
+
+<h3><a name="XSOAP_1_2_27"></a>2003-10-17 (not released XSOAP_1_2_27)</h3>
+<ul>
+<li>fixed bug related to propagation of HTTP headers and other server connection properties
+(available from soaprmi.soaprpc.SoapServices.getDefault().getConnectionContext().getIncomingProps().get("provides.http.headers");)
+</li>
+</ul>
+
+<h3><a name="XSOAP_1_2_24"></a>2003-04-29 (XSOAP_1_2_24)</h3>
+<ul>
+<li>fixed bug that prevented XSOAP from unmarshalling remote reference
+if signature of receiving method contained interface ...
+</ul>
+
+<h3><a name="XSOAP_1_2_23"></a>2003-04-19 (XSOAP_1_2_23)</h3>
+<ul>
+
+<li>updated logger with more detailed output and more flexible API,
+see <a href="../minilogger/doc/changes.html#MINILOGGER_1_0_7">list of miniLogger changes</a> for details
+
+<li>added lib/jakarta-regexp to make ANT taks <code>replaceregexp</code>
+ task works on versions prior to JDK 1.4
+
+<li>changed default mapping for java.util.Date from xsd1999:timeInstant to xsd:dateTime
+
+<li>fixed DateHandler to emit dateTime in 2001 XSD and not deprecated 1999 timeInstant
+(<a href="http://www.extreme.indiana.edu/bugzilla/show_bug.cgi?id=47">bug 47</a>)
+
+<li>added version support to XSOAP through soaprmi.Version that allows
+both easy compatibility checks (require() function) and to obtain current verion
+as String (one for main version and another for implementation version)
+(<a href="http://www.extreme.indiana.edu/bugzilla/show_bug.cgi?id=42">bug 42</a>)
+
+<li>unified handling of Object and XmlNode including arrays
+(<a href="http://www.extreme.indiana.edu/bugzilla/show_bug.cgi?id=44">bug 44</a>)
+
+<li>allowed to serialize array of string with null values
+(<a href="http://www.extreme.indiana.edu/bugzilla/show_bug.cgi?id=43">bug 43</a>)
+
+<li>fixed bug in setWriter() from SoapSerializeContextImpl that did not call reset()
+(calling reset() in close() is not enough if close() is not called between multiple uses
+of serialization context)
+
+<li>added <b>Soap.XSI_NS_CURR_NULL</b> to represent either xsi:nil (XSI_NS_2001_NIL) or
+xsd:null (XSI_NS_1999_NULL) depending on whatcurrent XML Schema is selected
+
+<li>added flag <b>SoapStyle.MULTI_REF</b> that controls if multi-ref serialization style
+should be used; added <b>new default SoapStyle.APACHESOAP</b> that is both doing deep
+serialization and supports multi reference for maximum interoperability
+and modified code to not use IBMSOAP (that is serialization that does not support muti-refs)
+<li>added mapping of xsd:any to XmlNode to make possible to get array of XmlNode (de)serialized ...
+<li>fixed bug in array deserializer that made impossible to have array element with empty string
+</ul>
+
+<h3>2003-03 (XSOAP_1_2_21 and XSOAP_1_2_22)</h3>
+<ul>
+<li>internal version - for testing
+</ul>
+
+<h3><a name="XSOAP_1_2_20"></a>2002-12-12 (XSOAP_1_2_20)</h3>
+<ul>
+
+<li><strong>this change MAY be affecting interoperability</strong> with <em>old</em>
+SOAP implementations but should improve interoperability with current SOAP toolkits that
+by default uses current official 2001 namesapce for XML Schemas and not old 1999 or 2000:
+XSOAP uses now the offcial XML schemas namespace 2001
+(XSOAP will still be able to process 1999 namesapces though but will always respond
+using 2001 namespaces)
+
+<li>changed serializer to use IdentityMap (implementation taken from Serp project)
+so different object instances that
+return equals() true will have preserved their identity preserved
+(for example two string strings: new String("a") and new String("a") will be two different
+object in serialization object graph)
+
+<li>added code to  allow empty array to be represented as [] instead of [0]
+(this differs from SOAP 1.1 see http://www.w3.org/TR/SOAP/#_Toc478383513 and arrayTypeValue/asize defintions
+however it improve interoperability with other SOAP implementations such as GLUE)
+<li>added support for character arrays (char[]) with char
+mapped to xsd:unsignedShort (0..65535)
+and serialized as array of xsd:unsignedShort
+
+<li>changed Util.loadClass to use AccessController.doPrivileged to call
+Thread.currentThread().getContextClassLoader(),
+added <b>Util.setClassLoader()</b> that sets class loader to use by XSOAP
+for all class loading, and fixed Struct.makeStructAccessor() to use Util.loadClass()
+(reported by Mark Swanson when runnning XSOAP inside Web Start with minimum
+security settings)
+
+<li>added support for long[] (it should have been done long time ago ...)
+
+<li>wrapped calls to System.getProperty() for "log" and "debug" into
+AccessController.doPrivileged() with catching AccessControlException
+to allow running XSOAP even if system properties can not be accessed
+(thanks to Mark Swanson for reporting this problem when running XSOAP inside Web Start)
+
+<li>appplied bug fixes from Mark Swanson: in HttpSocketSoapInvocationHandler incorrect
+selection of default TCP port and in MethodInvoker more robust
+parsing to allow empty content of &lt;faultstring>
+
+<li>added CoG dependency check
+for JSSE provider (as it uses CoG to get globus proxy used as SSL client certificate)
+
+<li>added get/setSoTimeout to wrapped socket returned from CogServerSocketFactory.accept
+as those methods in default (Iaik)GSIBaseSocket are not implemented
+
+<li>changed cog_delegation to use unlimted proxy delegation
+added cog_delegation_limited security provider for linited delegation
+
+<li>changed to use NoAuthorization intead of SelfAuthorization for CogServerSocketFactory
+
+<li>changed Base64Handler to use xsd:base64Binary instead of soapenc:base64
+to improve interoperability with other SOAP toolkits
+
+<li>fixed bug in BASE64 serialzier (Base64Handler) that was not using
+standard sctx.writeStart/EndTag and it was leading to exception when
+tag name to use was null in case of writing top level object in multi-ref serialization
+(<b>reported thanks to Stefano and Lou!</b>)
+
+<li>added unit test for embedded BASE64 byte[] inside struct
+and with two refereces to the same arr for multi-ref
+
+</ul>
+
+
+<h3><a name="XSOAP_1_2_19"></a>2002-11-14 (XSOAP_1_2_19)</h3>
+<ul>
+<li>fixed on cog_delegation code that does proxy delegation to do it directly and avoid using
+BaseServer from CoG (thanks to Shava and Gopi for reporting problems with delegation)
+<li>made ThrowableRewrapper more flexible in unwrapping exceptions
+</ul>
+
+<h3><a name="XSOAP_1_2_18b"></a>2002-11-11 (XSOAP_1_2_18b)</h3>
+<ul>
+<li>updated license in all files (have not realized how many .java files there is in XSOAP ...)
+<li>added to hello service sample ability to chain multiple services - good for testing
+globus proxy delegation as client can call hello service that calls
+another chained hello service and so on ...
+<li>added utility class <code>soaprmi.util.dynamic_proxy.ThrowableRewrapper</code>
+to allow rewrapping of RemoteException&nbsp; for remote objects that are exposed
+to users with exceptions that does not inherit from RemoteException ...</ul>
+</ul>
+
+<h3><a name="XSOAP_1_2_18a"></a>2002-11-1 (XSOAP_1_2_18a)</h3>
+<ul>
+<li>fixed NPE (NullPointerException)
+bug in JSSE/COG security providers when accessing incoming props
+that were not yet set (no incoming remote call) ...
+</ul>
+
+<h3><a name="XSOAP_1_2_18"></a>2002-10-31 (XSOAP_1_2_18)</h3>
+<ul>
+<li>fixed an elusive bug that manifested itself in old versions as &quot;context must
+be closed before it can be reused&quot; (one could say that this bug was even haunting as it is Halloween :-))
+in polling of deserCtx: in Unmarshaller returnDeserializeContextToPool()
+and close() were called even though close() already was calling returnDeserializeContextToPool()
+and in some rare situations when server was multitasking heavily led to duplicates in pool ...
+<li>making sure that pooled deserialization context is properly closed
+before handing it over (Soap.getDefault().getDeserializeContext())
+<li>added DeserializationContextt.isClosed() to pool methods in Soap class
+can close unclosed deserialization contexts when returning them to pool
+<li>allow (de)serialization of arrays of interfaces even if interface was not mapped
+when auto mapping is enabled. added new method to XmlJavaMapping to control
+interfaces namespace uri to use for array components (setDefaultArrayComponentInterfaceNsPrefix())
+
+<li>updated CoG jar file to the latest official version (0.9.13)
+and also checked that XSOAP compiles fine with version from CVS version (checked on 2002-10-27)
+
+</ul>
+
+<h3><a name="XSOAP_1_2_17"></a>2002-10-27 (XSOAP_1_2_17)</h3>
+<ul>
+<li>modified CogClientSocketFactory and JsseClientSocketFactory
+to use proxy that is in current thread connection context.
+That should allow to pass through globus proxy credentials when server conenction thread
+is used ot conenct to other services that requires GSI delegation.
+</ul>
+
+<h3><a name="XSOAP_1_2_16"></a>2002-10-23 (XSOAP_1_2_16)</h3>
+
+<ul>
+
+<li>fixed Unmarshaller to avoid reading past element (not call dctx.done())
+
+<li>added to Unmarshaller ability to read directly from pull parser, ex.:
+unmarshal(Class baseClass, XmlPullParser parser)<li>changed hello_server so it will install inteceptor that check
+globus dlegated proxy only when requested by command line option <code>-check_delegation</code>.
+(for example <code>run hello_server -check_delegation -secure -securityprovider jsse 8877</code>).
+
+<li>changed again JSSE security context to use CoG API to read multiple CA certs
+from cog.properties (suggested by Shava!)
+
+<li>changed JSSE security context to set multiple CoG trusted certs from cog.properties
+ and modified ReadProperties to return trusted CA cerets as String[]
+<li>fixed potential problems with exceptions that were not propagated (but just caught ...)
+in soaprmi.security.jsse.*
+<li>fixed SoapSerializeContextImpl.close() to call flush() on underlying writer
+(thanks to Yogesh!)
+<li>changed SoapEnc.readObject() to be able to deserialize XmlNode even if
+expected type is Object: added check that target java type (derived from mapping)
+implements XmlNode and if it is true then to bypass deserializer querying and
+return reconstructed XmlNode directly (see sample SimpleMessageSource in XMessages)
+</ul>
+
+<h3><a name="XSOAP_1_2_15"></a>2002-07-16 (XSOAP_1_2_15)</h3>
+<ul>
+<li>XSOAP now passes all Round 2 interop tests with Apache SOAP and Axis, see
+<a href="http://www.apache.org/~rubys/ApacheClientInterop.html">Apache
+Soap 2.3+ and Apache Axis Client Interop Results</a> (results are posted daily,
+<a href="http://www.apache.org/~rubys/ApacheClientInterop.html#25-soap">look for SoapRMI</a>)
+<li>moved reading of id sttribute and setting id value fixup from
+struct and array deserialziers to SoapEnc.readObject - this will
+allow more objects t be used as multirefs identifiable by id attribute
+<li>added suppord for xsd:decimal, xsd:hexBinary,
+Hashtable (as defined in Apache SOAP in namespace uri
+"http://xml.apache.org/xml-soap" and with local name "Map")
+and updated interopability sample
+<li>added deserialization support for href on top level return element
+  (it is sent by Axis in response to echo array but by no other SOAP implementation ...)
+</ul>
+
+<h3><a name="XSOAP_1_2_14"></a>2002-07-10 (XSOAP_1_2_14)</h3>
+<ul>
+<li>updated <a href="faq.html">FAQ</a>
+ with entries about accepting and returning XML fragments
+(by using
+<a href="http://www.extreme.indiana.edu/xgws/xsoap/xpp/download/PullParser2/doc/api/org/gjt/xpp/XmlNode.html">XmlNode</a>)
+ and how to use XML schemas in XSOAP (by generating
+Java Beans using such data binding tool like Castor)
+
+<li>new GOOGLE web services API sample: demonstrates how to use XSOAP with
+<a href="http://www.google.com/apis">Google API</a>.
+Before using make sure to get your secret key from Google :-)
+
+<li>allow to set default timeout from System.getProperty:
+changed HttpSocketSoapInvoker to static defaultTimeout,
+that is now 4 minutes (4 * 60 * 1000 milliseconds)
+until overridden System property <b><code>xsoap.rpc.invoke.timeout.ms</code></b>
+(that can be set from command line
+<b><code>-Dxsoap.rpc.invoke.timeout.ms=<i>X</i></code></b> [in milliseconds])
+
+<li>more debugging for sent and received characters in HttpUtils
+(including char-by-char parsing of HTTP response)
+that can be turned on by enabling special verbose logger
+ <b>soaprmi.verbose.trace.invoker</b>
+(from command line for example use <b><code>-Dlog=soaprmi.verbose.trace.invoker</code></b>)
+
+<li>fixed HttpUtils to detected EOF (-1) instead of going into infinite loop
+
+<li>this version number is bumped up to skip unlucky thirteen :-)
+
+</ul>
+
+<h3>2002-06-24 (XSOAP_1_2_12)</h3>
+<ul>
+<li>added support for mapping any XML content (&lt;xsd:any>)
+- it is enough to declare input parameter or return value type as
+<a href="http://www.extreme.indiana.edu/xgws/xsoap/xpp/download/PullParser2/doc/api/org/gjt/xpp/XmlNode.html">XmlNode</a>.
+
+<li>added support for BASE64 encoding and decoding of byte arrays
+
+<li>added new logging levels to facilitate tracing:<ul>
+<li><b>soaprmi.trace.execution</b> shows messages for execution on server side
+<li><b>soaprmi.trace.dispatch.in</b> shows incoming requsts on the wire
+<li><b>soaprmi.trace.dispatch.out</b> shows putgoing responses on the wire
+<li><b>soaprmi.trace.invoke.out</b> shows outgoing invocation on the wire
+<li><b>soaprmi.trace.invoke.in</b> shows incoming response on the wire
+</ul>
+<li>added to hello sample an example of how to customize interface (portType)
+mapping for parameter names
+</ul>
+
+<h3>2002-03-19 (XSOAP_1_2_11)</h3>
+<ul>
+<li>IN PROGRESS: added per thread ConnectionContext  that allow to get properties
+for incoming call (such as socket, GSI delegation, headers)
+and set outgoing properties (GSI delegation to use, headers)
+<li>IN PROGRESS: limited support for WSDL as alternative
+representation of XSOAP remote reference
+<li>fixed bug related to registration of RemoteRef serializer and converter
+- as lock was not maintained on EncodingStyle enc = SoapEnc.getDefault();
+it could happen that serailizer/converter would be registered twice
+and that resulted in exception...
+</ul>
+
+<h3>2002-03 (interim release XSOAP_1_2_10)</h3>
+<ul>
+<li>refactored mapping support to expose mapping java methods/parameters
+to messages and part maps
+<li>fixed bug in minilogger (see
+<a href="http://www.extreme.indiana.edu/~aslom/minilogger/v10/doc/changes.html">minilogger
+changes log</a>)
+</ul>
+
+<h3>2002-02-22 (XSOAP_1_2_9)</h3>
+<ul>
+<li>applied patch provided by Ullrich Poll?hne to fix problem with missing HTTP cookie support
+<li>added abillity to set default SoapStyle and this is used by all serialization
+- currently the same as previously hardcoded SoapStyle.IBMSOAP (that is compatible
+with Apache SOAP 2.x)
+</ul>
+
+<h3>2001-12 (XSOAP_1_2_8)</h3>
+<ul>
+<li>added Vector serializer to array and converter of arrays to Vector
+see VectorSerializer.java and VectoConverter.java
+<li>improved and simplified (de)serialization registration in EncodingStyle
+(such as SoapEnc)
+<li>improved array de/serialization: handling of null value array items
+(they must be always serialized independent of SOAP style)
+<li>improved SoapEnc.readObject to deserailize using xsi:type if available
+(fixing bug when expectedType is unkown)
+</ul>
+
+<h3>2001-11-29 (XSOAP_1_2_7)</h3>
+<ul>
+<li>moved logging utility classes to minilogger sub-folder
+so can be compiled and used separately from XSOAP
+(in future minilogger should be have more configurable output adapter).
+
+<li>changed "Class.forName" to use context class loader
+so hopefully it works better in servlet container environment
+
+<li>added HelloSpeedTest.java that demonstrates impact
+of keep-alive on example of HttpURLConnection (when used KA
+XSOAP is almost twice fast...). for now XSOAP is not
+doing keep-alive but open/close socket for each invocation
+
+<li>fixed bug related to synchronization in MethodInvoker that
+could manifest in exception when RemoteRefSerializer
+was registered twice
+(thanks to Mark Swanson for finding it)
+</ul>
+
+<h3>2001-11-07 (VER_1_2_6)</h3>
+
+<ul>
+
+<li>added ability to override IP address of host that is provide by Java
+and that doe snot work on multi-homed IP machines or some RedHat instalations :-)
+
+simply use <b><code>-Dxsoap.host.ip=<i>IP_ADDR</i></code></b> system property
+(can be set with JAVA_OPTS when run script used)
+
+</ul>
+
+
+
+<h3>2001-11-01 (VER_1_2_3)</h3>
+
+<ul>
+<li>addded new extensible security framework (see under src/java/security)
+<li>numerous small bug fixes and improvements
+</ul>
+
+<h3>2001-08-19 (VER_1_2_0)</h3>
+
+Summary of changes from SoapRMI 1.1:
+<ul>
+<li>moved to use XPP2 (the biggest difference is use of factory pattern
+and StartTag/EndTag names changed to XmlStarTag/XmlEndTag
+<li>improved build process: now distinction between layers is enforced
+by compilation order
+<li>trimmed down and clarified samples: only hello and interop
+<li>logger classes are now in <code>soaprmi.util.logging</code>,
+use this instead of soaprmi.util.*
+<pre>import soaprmi.util.logging.Log;
+import soaprmi.util.logging.Logger;
+</pre>
+<li>soaprmi.util.Util class was split into specific Utils
+(such as soaprmi.jndi.Util)
+<li>HTTPUtils migrated to soaprmi.soaprpc
+<li>added to EncodingStyle and SoapEnc support for registering and querying
+  serializers and deserializer (both for java classes and interfaces)
+</ul>
+
+<p>&nbsp;<p>[<a href="../README.html">Back To XSOAP Documentation</a>]<p>&nbsp;
+
+<HR>
+<address><a href="http://www.extreme.indiana.edu/~aslom/">Aleksander Slominski</a><address>
+</address>
+</BODY>
+</HTML>

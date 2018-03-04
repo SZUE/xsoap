@@ -1,0 +1,53 @@
+Overview of security design in XSOAP
+------------------------------------
+
+soaprmi.soaprpc.SecureSoapServices is entry point to all security in XSOAP.
+This class works as a factory accessing soaprmi.security.PROVIDER.SecureSoapServices
+However this is abstract class that must be extended by security provider.
+
+soaprmi.soaprpc.SecureSoapServices uses java reflection to locate 
+and access security providers (so it is completely dynamic)
+and the user has ability to override hardcoded default security
+providers (currently "cog") by specifying system property
+-Dsoaprmi.security.providers=PROVIDER (this can be actually list
+of providers to try) or by calling setDefault(...) in runtime.
+
+Also separate instances of SecureSoapServices can be created and
+used simultaneously allowing to have multiple security communication
+channels opened and even the same service exported on multiple endpoints
+(by adding more than one Dispatcher to the secure soap services).
+
+In soaprmi/security directory we have soaprmi.security.SoaprmiSecurityContext
+that is an utility class that can be used to create 
+socket based secure SOAP communication. 
+This class defines how to create two factories:
+1. SoaprmiClientSocketFactory newClientSocketFactory()
+   this factory is used to open client connections to server
+2. SoaprmiServerSocketFactory newServerSocketFactory(int port)
+   this factory is used to accept client connection by server
+To simplify creation of SecureSoapServices that 
+are using  SoaprmiSecurityContext we provide 
+soaprmi.security.SecurityContextBasedSoapServices
+that implements all necessary services that are required
+to create Invokers and Dispatcher that are used by XSOAP
+to handle all remote communication in secure manner.
+
+Therefore to create new security provider there are two choices:
+either to just extend soaprmi.soaprpc.SecureSoapServices and
+that uses its own secure transport or if the transport
+is based on sockets and just needs SOAP/HTTP on top of it 
+then extend soaprmi.security.SecurityContextBasedSoapServices
+and implement soaprmi.security.SoaprmiSecurityContext.
+
+You can see an example of implementation of a security provider
+in directories soaprmi/security/cog/SecureSoapServices.
+
+We have no longer separate samples - all XSOAP services
+can now be easily made into secure ones and to demonstrate
+it we have only one set of samples both for secure
+and unsecure connections (see doc/run.txt).
+
+
+NOTE: to run CoG enabled secure soap services make sure the proxy certificate 
+is available in location specified by cog.properties (run grid-proxy-init)
+

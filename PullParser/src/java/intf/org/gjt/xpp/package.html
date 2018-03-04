@@ -1,0 +1,141 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html">
+</head>
+<body bgcolor="#FFFFFF">
+This package defines classes compromising public API of XML Pull Parser 2.0 (org.gjt.xpp).
+
+<p><strong>Note</strong> this package is <strong>deprecated</strong> by
+<a target="_top" href="http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/">next version of XML Pull Parser called XPP3/MXP1</a>
+that implements <a target="_top" href="http://www.xmlpull.org/">XmlPull API</a>.
+
+<p>Usage:
+
+<P>
+Xml Pull Parser (XPP) provides a simple and fast implementation of
+&quot;pull parsing model&quot; that allows
+processing application to request <a href="#events">parsing events</a>
+incrementally (ideal for deserializing XML such as SOAP encoding).
+
+<P>Following steps are required to use XPP:
+<ol>
+<li>create an instance of {@link org.gjt.xpp.XmlPullParserFactory} using
+newInstance() method
+<li>create an instance of {@link org.gjt.xpp.XmlPullParser} using
+newPullParser() method on instance of {@link org.gjt.xpp.XmlPullParserFactory}
+<li>set options (if they are different than defaults)
+<li>set input by calling either
+{@link org.gjt.xpp.XmlPullParser#setInput(Reader)}
+or
+{@link org.gjt.xpp.XmlPullParser#setInput(char[])}
+<li>start parsing by calling
+{@link org.gjt.xpp.XmlPullParser#next}
+
+- this method returns event type and
+parsing is finished when it returns
+{@link org.gjt.xpp.XmlPullParser#END_DOCUMENT} event type.
+</ol>
+
+<P>Typically parsing is done in <em>while loop</em> that will
+work until {@link org.gjt.xpp.XmlPullParser#next} returns
+{@link org.gjt.xpp.XmlPullParser#END_DOCUMENT} event.
+<a name="events">All possible types of events</a>
+ that {@link org.gjt.xpp.XmlPullParser#next} can return:
+<UL>
+<li>{@link org.gjt.xpp.XmlPullParser#END_DOCUMENT} to signal that parsing is finished
+<li>{@link org.gjt.xpp.XmlPullParser#START_TAG} - user can now call
+{@link org.gjt.xpp.XmlPullParser#readStartTag} to get start tag information including
+element name, (if namespaces are supported, uri and localName can also
+be obtained) and attributes
+<li>{@link org.gjt.xpp.XmlPullParser#END_TAG} - end tag was read and user can call
+{@link org.gjt.xpp.XmlPullParser#readEndTag} to get end tag information
+<li>{@link org.gjt.xpp.XmlPullParser#CONTENT} element constent was read and user can
+call {@link org.gjt.xpp.XmlPullParser#readContent} to get it
+</UL>
+
+<P>If there is parsing error {@link org.gjt.xpp.XmlPullParser#next} will throw
+{@link org.gjt.xpp.XmlPullParserException}.
+
+<P>An example Java program may look like this:
+(for more detailed example please see
+<strong><code>src/java/samples/</code></strong>)
+
+<PRE>
+  // 1. creating instance of parser
+  XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+  XmlPullParser pp = factory.newPullParser();
+
+  // 2. setting options
+  // ex. disabling mixed content for elements
+  // (element can not have elements mixed with non-whitespace string content)
+  pp.setAllowedMixedContent(false);
+
+  // 3. setting input
+  String data = "&lthello>World!&lt;/hello>";
+  // input will be taken from java.io.Reader
+  pp.setInput(new StringReader(data));
+
+  // input could be also taken from String directly:
+  //pp.setInput(data.toCharArray());
+
+  // 4. parsing
+
+  //declare variables used during parsing
+  byte type;  // received event type
+  XmlStartTag stag = factory.newStartTag();
+  XmlEndTag etag = factory.newEndTag();
+
+  // start parsing loop
+  while((type = pp.next()) != XmlPullParser.END_DOCUMENT) {
+    if(type == XmlPullParser.CONTENT) {
+      String s = pp.readContent();
+      System.out.println("CONTENT={'"+s+"'}");
+    } else if(type == XmlPullParser.END_TAG) {
+      pp.readEndTag(etag);
+      System.out.println(""+etag);
+    } else if(type == XmlPullParser.START_TAG) {
+      pp.readStartTag(stag);
+      System.out.println(""+stag);
+    }
+  }
+</PRE>
+
+
+<P>After parsing is finished, parser instance may be reused
+by calling again {@link org.gjt.xpp.XmlPullParser#setInput(Reader)}.
+
+
+<P><STRONG>Example Java code that will read string for SOAP encoding</STRONG><BR>
+
+<PRE>
+  public String readString(XmlPullParser pp, XmlStartTag stag)
+    throws DeserializeException, XmlPullParserException, IOException
+  {
+    String xs = stag.getAttributeValue(Soap.XSI_NS, "null");
+    if( "1".equals(xs) ) {
+      if(pp.next() != XmlPullParser.END_TAG)
+        throw new DeserializeException("expected end tag");
+      return null;
+    }
+    if(pp.next() != XmlPullParser.CONTENT)
+      throw new DeserializeException("expected content");
+    String content = pp.readContent();
+    if(pp.next() != XmlPullParser.END_TAG)
+      throw new DeserializeException("expected end tag");
+    return content;
+  }
+</PRE>
+
+
+<P>
+    <br>
+    <address><a href="http://www.extreme.indiana.edu/~aslom/">Aleksander Slominski</a></address>
+    <br>
+<!-- Created: Thu Apr  14 18:21:21 EST 2000 -->
+Last modified: $Id: package.html,v 1.4 2002/12/11 01:49:32 aslom Exp $
+
+
+</body>
+</html>
+
